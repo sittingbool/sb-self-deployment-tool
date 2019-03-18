@@ -1,0 +1,25 @@
+{
+  "name": "sb-self-deployment-tool",
+  "version": "0.1.0",
+  "description": "A tool that automatically deploy from your git when there is a change available. Featuring time interval lookup or trigger.",
+  "main": "app/index.js",
+  "scripts": {
+    "test": "mocha app/tests/**/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sittingbool/sb-self-deployment-tool.git"
+  },
+  "keywords": [
+    "deployment",
+    "node.js",
+    "git",
+    "pull"
+  ],
+  "author": "Richard Habermann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sittingbool/sb-self-deployment-tool/issues"
+  },
+  "homepage": "https://github.com/sittingbool/sb-self-deployment-tool#readme"
+}
