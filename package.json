@@ -21,5 +21,12 @@
   "bugs": {
     "url": "https://github.com/sittingbool/sb-self-deployment-tool/issues"
   },
-  "homepage": "https://github.com/sittingbool/sb-self-deployment-tool#readme"
+  "homepage": "https://github.com/sittingbool/sb-self-deployment-tool#readme",
+  "dependencies": {
+    "node-cron": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/node-cron": "^2.0.1",
+    "simple-git": "git+https://github.com/types/simple-git.git"
+  }
 }
