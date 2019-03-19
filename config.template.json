@@ -1,0 +1,19 @@
+{
+  "workDir": ".",
+  "git": {
+    "repository": "",
+    "branch": "develop"
+  },
+  "trigger": {
+    "cron": "*/30 * * * * *",
+    "webInterface": {
+      "port": 3000,
+      "endpoint": "/trigger",
+      "excludeEnvironments": ["production"]
+    }
+  },
+  "email": {
+    "recipients": []
+  },
+  "envVar": "NODE_ENV"
+}
