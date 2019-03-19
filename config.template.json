@@ -1,0 +1,31 @@
+{
+  "workDir": ".",
+  "git": {
+    "repository": "git@github.com:sittingbool/sb-self-deployment-tool.git",
+    "branch": "develop"
+  },
+  "trigger": {
+    "cron": "*/30 * * * * *",
+    "webInterface": {
+      "port": 3000,
+      "endpoint": "/trigger",
+      "excludeEnvironments": ["production"]
+    }
+  },
+  "email": {
+    "sender": "sysbot.1ws@t-online.de",
+    "recipients": ["richie_habbie@web.de", "Balazs.Csontos@t-systems.com"],
+    "transport": {
+      "host": "smtp.ethereal.email",
+      "port": 465,
+      "secure": true,
+      "auth": {
+        "user": "account.user",
+        "pass": "account.pass"
+      }
+    }
+  },
+  "envVar": "NODE_ENV",
+  "buildCmd": "echo 'build would be here'",
+  "deployCmd": "echo 'deployment would be here'"
+}

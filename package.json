@@ -6,6 +6,9 @@
   "scripts": {
     "test": "mocha app/tests/**/*.js"
   },
+  "bin": {
+    "snippet": "./bin/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sittingbool/sb-self-deployment-tool.git"
@@ -23,10 +26,16 @@
   },
   "homepage": "https://github.com/sittingbool/sb-self-deployment-tool#readme",
   "dependencies": {
-    "node-cron": "^2.0.3"
+    "@sendgrid/mail": "^6.3.1",
+    "commander": "^2.19.0",
+    "node-cron": "^2.0.3",
+    "nodemailer": "^5.1.1",
+    "sb-util-ts": "^1.3.1",
+    "simple-git": "^1.107.0"
   },
   "devDependencies": {
+    "@types/node": "^11.11.3",
     "@types/node-cron": "^2.0.1",
-    "simple-git": "git+https://github.com/types/simple-git.git"
+    "@types/nodemailer": "^4.6.6"
   }
 }
