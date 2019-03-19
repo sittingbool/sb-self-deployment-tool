@@ -17,6 +17,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
 const util_1 = require("util");
+const sb_util_ts_1 = require("sb-util-ts");
 const readFile = util_1.promisify(fs.readFile);
 function loadJson(filePath) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -25,4 +26,39 @@ function loadJson(filePath) {
     });
 }
 exports.loadJson = loadJson;
+function configEnvForName(name) {
+    if (sb_util_ts_1.stringIsEmpty(name) || !name.trim().startsWith('env:')) {
+        return undefined;
+    }
+    return name.replace('env:', '').trim();
+}
+function stringConfigFromEnv(name) {
+    const envVar = configEnvForName(name);
+    if (sb_util_ts_1.stringIsEmpty(envVar)) {
+        return name;
+    }
+    return process.env[envVar];
+}
+exports.stringConfigFromEnv = stringConfigFromEnv;
+function intConfigFromEnv(name) {
+    const strVal = stringConfigFromEnv(name);
+    if (sb_util_ts_1.stringIsEmpty(strVal))
+        return undefined;
+    return parseInt(strVal);
+}
+exports.intConfigFromEnv = intConfigFromEnv;
+function floatConfigFromEnv(name) {
+    const strVal = stringConfigFromEnv(name);
+    if (sb_util_ts_1.stringIsEmpty(strVal))
+        return undefined;
+    return parseFloat(strVal);
+}
+exports.floatConfigFromEnv = floatConfigFromEnv;
+function boolConfigFromEnv(name) {
+    const strVal = stringConfigFromEnv(name);
+    if (sb_util_ts_1.stringIsEmpty(strVal))
+        return undefined;
+    return !!parseInt(strVal);
+}
+exports.boolConfigFromEnv = boolConfigFromEnv;
 //# sourceMappingURL=util.js.map
