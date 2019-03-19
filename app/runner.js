@@ -85,8 +85,13 @@ class Runner {
     validateGit() { }
     checkUpdates() {
         return __awaiter(this, void 0, void 0, function* () {
+            if (sb_util_ts_1.mapIsEmpty(this.config.git)) {
+                throw 'No git config given';
+            }
+            let gitConfig = this.config.git;
             let output = yield git.listRemote(['--heads']);
-            console.log(output);
+            let rows = output.split(/\r?\n/);
+            let filtered = rows.filter((val) => { return val.indexOf('refs/heads/' + gitConfig.branch) > -1; });
         });
     }
 }

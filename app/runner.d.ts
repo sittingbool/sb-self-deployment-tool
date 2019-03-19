@@ -1,15 +1,16 @@
 import { ScheduledTask } from 'node-cron';
 import { HttpServer } from "./server";
 export interface RunnerConfig {
-    git?: {
-        repository: string;
-        branch: string;
-    };
+    git?: GitConfig;
     trigger?: TriggerConfig;
     email?: {
         recipients: string[];
     };
     envVar?: string;
+}
+export interface GitConfig {
+    repository: string;
+    branch: string;
 }
 export interface TriggerConfig {
     cron?: string;

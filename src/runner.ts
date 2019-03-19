@@ -8,15 +8,17 @@ import {arrayIsEmpty, mapIsEmpty, stringIsEmpty} from "sb-util-ts";
 const git = simplegit(process.cwd());
 
 export interface RunnerConfig {
-    git?: {
-        repository: string,
-        branch: string
-    },
+    git?: GitConfig;
     trigger?: TriggerConfig;
     email?: {
         recipients: string[]
     },
     envVar?: string
+}
+
+export interface GitConfig {
+    repository: string;
+    branch: string;
 }
 
 export interface TriggerConfig {
@@ -37,6 +39,7 @@ export class Runner {
     private config: RunnerConfig = {};
     private environment: string = 'unspecified';
     private workDirPath: string = process.cwd();
+
 
     async runFromConfig(config: string | RunnerConfig) {
         if (mapIsEmpty(config) && stringIsEmpty(<string>config)) {
@@ -99,7 +102,12 @@ export class Runner {
     validateGit() {}
 
     async checkUpdates(): Promise<void> {
+        if (mapIsEmpty(this.config.git)) {
+            throw 'No git config given';
+        }
+        let gitConfig = <GitConfig>this.config.git;
         let output = await git.listRemote(['--heads']);
-        console.log(output);
+        let rows = output.split(/\r?\n/);
+        let filtered = rows.filter((val) => { return val.indexOf('refs/heads/' + gitConfig.branch) > -1; });
     }
 }
