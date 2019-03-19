@@ -1,13 +1,13 @@
 {
   "name": "sb-self-deployment-tool",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A tool that automatically deploy from your git when there is a change available. Featuring time interval lookup or trigger.",
   "main": "app/index.js",
   "scripts": {
     "test": "mocha app/tests/**/*.js"
   },
   "bin": {
-    "snippet": "./bin/index.js"
+    "sb-deploy-tool": "./bin/index.js"
   },
   "repository": {
     "type": "git",
