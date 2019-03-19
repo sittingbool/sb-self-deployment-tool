@@ -26,7 +26,7 @@ const promise_1 = __importDefault(require("simple-git/promise"));
 const util_1 = require("./util");
 const sb_util_ts_1 = require("sb-util-ts");
 const nodemailer = __importStar(require("nodemailer"));
-const git = promise_1.default(process.cwd());
+let git = promise_1.default(process.cwd());
 const defaultTransport = {
     host: "smtp.ethereal.email",
     port: 587,
@@ -84,6 +84,7 @@ class Runner {
             }
             const absolutePath = path_1.default.isAbsolute(this.workDirPath) ? this.workDirPath : path_1.default.join(process.cwd(), this.workDirPath);
             console.log((new Date()) + ': Started auto deploy runner for directory: ' + absolutePath);
+            git = promise_1.default(absolutePath);
             try {
                 yield this.initRunner();
             }
@@ -215,8 +216,8 @@ class Runner {
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
-            `Repository: ${repository}\n` +
-            `Branch: ${branch}\n` +
+            `Repository: ${repository}\n` + '\n' +
+            `Branch: ${branch}\n` + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
         let subject = 'Successful auto deployment on environment: ' + this.environment;
         this.sendMail({ subject: subject, text: msg });
@@ -235,8 +236,8 @@ class Runner {
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         msg = 'For\n' +
-            `Repository: ${repository}\n` +
-            `Branch: ${branch}\n` +
+            `Repository: ${repository}\n` + '\n' +
+            `Branch: ${branch}\n` + '\n' +
             '\n\nThe following error occurred:\n\n' +
             msg;
         let subject = 'Error on auto deployment on environment: ' + this.environment;

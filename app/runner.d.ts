@@ -38,13 +38,13 @@ export declare class Runner {
     runFromConfig(config: string | RunnerConfig): Promise<void>;
     private initRunner;
     private initTriggers;
-    runCron(schedule: string): void;
-    runEndpoint(endpointPath: string, port?: number): void;
+    private runCron;
+    private runEndpoint;
     validateGit(): Promise<void>;
     checkUpdates(): Promise<void>;
     private performDeployment;
     private runOnShell;
-    sendSuccessMail(): void;
-    sendErrorMail(error: string | Error): void;
+    private sendSuccessMail;
+    private sendErrorMail;
     private sendMail;
 }

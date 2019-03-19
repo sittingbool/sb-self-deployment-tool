@@ -1,6 +1,6 @@
 {
   "name": "sb-self-deployment-tool",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A tool that automatically deploy from your git when there is a change available. Featuring time interval lookup or trigger.",
   "main": "app/index.js",
   "scripts": {
@@ -17,7 +17,14 @@
     "deployment",
     "node.js",
     "git",
-    "pull"
+    "pull",
+    "continuous",
+    "continuous integration",
+    "continuous deployment",
+    "auto deplyoment",
+    "auto deply",
+    "self deplyoment",
+    "self deply"
   ],
   "author": "Richard Habermann",
   "license": "MIT",
