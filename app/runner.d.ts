@@ -1,16 +1,21 @@
-import { ScheduledTask } from 'node-cron';
-import { HttpServer } from "./server";
+import * as nodemailer from 'nodemailer';
 export interface RunnerConfig {
+    workDir?: string;
     git?: GitConfig;
     trigger?: TriggerConfig;
-    email?: {
-        recipients: string[];
-    };
+    email?: EmailConfig;
     envVar?: string;
+    buildCmd?: string;
+    deployCmd?: string;
 }
 export interface GitConfig {
     repository: string;
     branch: string;
+}
+export interface EmailConfig {
+    sender: string;
+    recipients: string[];
+    transport?: nodemailer.Transport;
 }
 export interface TriggerConfig {
     cron?: string;
@@ -22,15 +27,24 @@ export interface WebInterfaceConfig {
     excludeEnvironments: string[];
 }
 export declare class Runner {
-    static cronTask: ScheduledTask;
-    static httpServer: HttpServer;
+    private static cronTask;
+    private static httpServer;
     private config;
     private environment;
     private workDirPath;
+    private mailTransport;
+    private usingMNonConfigMailTransport;
+    setupMailTransport(transport?: nodemailer.Transport): void;
     runFromConfig(config: string | RunnerConfig): Promise<void>;
-    initTriggers(): void;
+    private initRunner;
+    private initTriggers;
     runCron(schedule: string): void;
     runEndpoint(endpointPath: string, port?: number): void;
-    validateGit(): void;
+    validateGit(): Promise<void>;
     checkUpdates(): Promise<void>;
+    private performDeployment;
+    private runOnShell;
+    sendSuccessMail(): void;
+    sendErrorMail(error: string | Error): void;
+    private sendMail;
 }
