@@ -13,12 +13,12 @@
     }
   },
   "email": {
-    "sender": "sysbot.1ws@t-online.de",
-    "recipients": ["richie_habbie@web.de", "Balazs.Csontos@t-systems.com"],
+    "sender": "sittingbool@gmx.de",
+    "recipients": ["some.admin@domain.com"],
     "transport": {
       "host": "smtp.ethereal.email",
-      "port": 465,
-      "secure": true,
+      "port": 25,
+      "secure": false,
       "auth": {
         "user": "account.user",
         "pass": "account.pass"

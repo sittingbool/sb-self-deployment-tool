@@ -8,7 +8,7 @@ import {arrayIsEmpty, mapIsEmpty, stringIsEmpty} from "sb-util-ts";
 import {ExecException} from "child_process";
 import * as nodemailer from 'nodemailer';
 
-const git = simplegit(process.cwd());
+let git = simplegit(process.cwd());
 const defaultTransport = {
     host: "smtp.ethereal.email",
     port: 587,
@@ -99,7 +99,7 @@ export class Runner {
         }
         const absolutePath = path.isAbsolute(this.workDirPath) ? this.workDirPath : path.join(process.cwd(), this.workDirPath);
         console.log((new Date()) + ': Started auto deploy runner for directory: ' + absolutePath);
-
+        git = simplegit(absolutePath);
         try {
             await this.initRunner();
         } catch (e) {
@@ -128,7 +128,7 @@ export class Runner {
         }
     }
 
-    runCron(schedule: string) {
+    private runCron(schedule: string) {
         Runner.cronTask = cron.schedule(schedule, () => {
             console.log(new Date() + ': Running from cron trigger');
             this.checkUpdates().catch(err => {
@@ -138,7 +138,7 @@ export class Runner {
         });
     }
 
-    runEndpoint(endpointPath: string, port?: number) {
+    private runEndpoint(endpointPath: string, port?: number) {
         const handler: EndPointHandler = (request, response) => {
             console.log(new Date() + ': Running from http trigger');
             this.checkUpdates().then(() => {
@@ -225,20 +225,20 @@ export class Runner {
         });
     }
 
-    sendSuccessMail() {
+    private sendSuccessMail() {
         const gitConfig = <GitConfig>this.config.git || { repository: 'unknown', branch: 'unknown'};
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
-            `Repository: ${repository}\n` +
-            `Branch: ${branch}\n` +
+            `Repository: ${repository}\n` + '\n' +
+            `Branch: ${branch}\n` + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
         let subject = 'Successful auto deployment on environment: ' + this.environment;
 
         this.sendMail({subject: subject, text: msg});
     }
 
-    sendErrorMail(error: string | Error) {
+    private sendErrorMail(error: string | Error) {
         let msg = 'unknown or not parsable Error';
         if (typeof error === 'object') {
             try {
@@ -251,8 +251,8 @@ export class Runner {
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         msg = 'For\n' +
-            `Repository: ${repository}\n` +
-            `Branch: ${branch}\n` +
+            `Repository: ${repository}\n` + '\n' +
+            `Branch: ${branch}\n` + '\n' +
             '\n\nThe following error occurred:\n\n' +
             msg;
         let subject = 'Error on auto deployment on environment: ' + this.environment;
