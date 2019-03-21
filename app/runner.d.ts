@@ -1,3 +1,5 @@
+import { ScheduledTask } from 'node-cron';
+import { HttpServer } from "./server";
 import * as nodemailer from 'nodemailer';
 export interface RunnerConfig {
     workDir?: string;
@@ -7,6 +9,8 @@ export interface RunnerConfig {
     envVar?: string;
     buildCmd?: string;
     deployCmd?: string;
+    successCmd?: string;
+    errorCmd?: string;
 }
 export interface GitConfig {
     repository: string;
@@ -27,24 +31,27 @@ export interface WebInterfaceConfig {
     excludeEnvironments: string[];
 }
 export declare class Runner {
-    private static cronTask;
-    private static httpServer;
-    private config;
-    private environment;
-    private workDirPath;
-    private mailTransport;
-    private usingMNonConfigMailTransport;
+    protected static cronTask: ScheduledTask;
+    protected static httpServer: HttpServer;
+    protected config: RunnerConfig;
+    protected environment: string;
+    protected workDirPath: string;
+    protected mailTransport: nodemailer.Transporter;
+    protected usingMNonConfigMailTransport: boolean;
     setupMailTransport(transport?: nodemailer.Transport): void;
     runFromConfig(config: string | RunnerConfig): Promise<void>;
     private initRunner;
     private initTriggers;
+    protected replaceConfigByEnvVars(input?: any): any;
     private runCron;
     private runEndpoint;
     validateGit(): Promise<void>;
     checkUpdates(): Promise<void>;
     private performDeployment;
-    private runOnShell;
+    protected runOnShell(cmd: string): Promise<string>;
     private sendSuccessMail;
     private sendErrorMail;
     private sendMail;
+    protected runSuccessCommand(cmd: string | undefined): Promise<string | undefined>;
+    protected runErrorCommand(cmd: string | undefined, error: Error | string): Promise<string | undefined>;
 }

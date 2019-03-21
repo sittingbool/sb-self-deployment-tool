@@ -36,6 +36,14 @@ const defaultTransport = {
         pass: 'account.pass' // generated ethereal password
     }
 };
+const ConfigParamTypes = {
+    workDir: 'string', git: 'config', trigger: 'config', email: 'config', envVar: 'string',
+    buildCmd: 'string', deployCmd: 'string', successCmd: 'string', errorCmd: 'string',
+    repository: 'string', branch: 'string', sender: 'string', recipients: 'string-array',
+    transport: 'config', host: 'string', port: 'int', secure: 'boolean', auth: 'config',
+    user: 'string', pass: 'string', cron: 'string', webInterface: 'config', endpoint: 'config',
+    excludeEnvironments: 'string-array'
+};
 class Runner {
     constructor() {
         this.config = {};
@@ -75,6 +83,7 @@ class Runner {
             else {
                 console.error('Invalid config given');
             }
+            this.replaceConfigByEnvVars();
             this.setupMailTransport();
             if (!sb_util_ts_1.stringIsEmpty(this.config.envVar)) {
                 this.environment = process.env[this.config.envVar] || this.environment;
@@ -114,11 +123,50 @@ class Runner {
             this.runEndpoint(webInterface.endpoint, webInterface.port);
         }
     }
+    replaceConfigByEnvVars(input) {
+        let config = input || this.config;
+        for (const key in config) {
+            let entry = config[key];
+            let type = ConfigParamTypes[key];
+            if (!entry)
+                continue;
+            switch (type) {
+                case 'config':
+                    if (!Array.isArray(entry)) {
+                        config[key] = this.replaceConfigByEnvVars(entry);
+                    }
+                    break;
+                case 'string':
+                    config[key] = util_1.stringConfigFromEnv(entry);
+                    break;
+                case 'string-array':
+                    let value = util_1.stringConfigFromEnv(entry) || entry;
+                    if (typeof value === 'string') {
+                        value = value.split(',');
+                    }
+                    config[key] = value;
+                    break;
+                case 'int':
+                    config[key] = util_1.intConfigFromEnv(entry) || entry;
+                    break;
+                case 'float':
+                    config[key] = util_1.floatConfigFromEnv(entry) || entry;
+                    break;
+                case 'boolean':
+                    config[key] = util_1.boolConfigFromEnv(entry) || entry;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return input;
+    }
     runCron(schedule) {
         Runner.cronTask = node_cron_1.default.schedule(schedule, () => {
             console.log(new Date() + ': Running from cron trigger');
             this.checkUpdates().catch(err => {
                 console.error(err);
+                this.runErrorCommand(this.config.errorCmd, err).catch(this.sendErrorMail);
                 this.sendErrorMail(err);
             });
         });
@@ -130,6 +178,7 @@ class Runner {
                 server_1.HttpServer.sendResponse(response, 'Ok', 200);
             }).catch(err => {
                 console.error(err);
+                this.runErrorCommand(this.config.errorCmd, err).catch(this.sendErrorMail);
                 this.sendErrorMail(err);
                 server_1.HttpServer.sendResponse(response, 'Something went wrong:\n\n' + err, 200);
             });
@@ -189,6 +238,7 @@ class Runner {
                 console.log((new Date()) + ': Running deploy command ' + this.config.deployCmd);
                 yield this.runOnShell(this.config.deployCmd);
             }
+            yield this.runSuccessCommand(this.config.successCmd);
             this.sendSuccessMail();
             console.log((new Date()) + ': Done deploying for ' + branchName);
         });
@@ -216,8 +266,8 @@ class Runner {
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
-            `Repository: ${repository}\n` + '\n' +
-            `Branch: ${branch}\n` + '\n' +
+            'Repository: ' + repository + '\n' +
+            'Branch: ' + branch + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
         let subject = 'Successful auto deployment on environment: ' + this.environment;
         this.sendMail({ subject: subject, text: msg });
@@ -236,8 +286,8 @@ class Runner {
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         msg = 'For\n' +
-            `Repository: ${repository}\n` + '\n' +
-            `Branch: ${branch}\n` + '\n' +
+            'Repository: ' + repository + '\n' +
+            'Branch: ' + branch + '\n' +
             '\n\nThe following error occurred:\n\n' +
             msg;
         let subject = 'Error on auto deployment on environment: ' + this.environment;
@@ -248,13 +298,35 @@ class Runner {
             return console.error('No email config given to send result');
         }
         let emailConfig = this.config.email;
+        let recipients = typeof emailConfig.recipients === 'string' ? util_1.stringConfigFromEnv('' + emailConfig.recipients) : emailConfig.recipients.join(', ');
         const msg = Object.assign({
-            to: emailConfig.recipients.join(', '),
+            to: recipients,
             from: emailConfig.sender
         }, data);
         this.mailTransport.sendMail(msg)
             .then(() => { console.log('-- email sent --'); })
             .catch(console.error);
+    }
+    runSuccessCommand(cmd) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (sb_util_ts_1.stringIsEmpty(cmd))
+                return;
+            return this.runOnShell(cmd);
+        });
+    }
+    runErrorCommand(cmd, error) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (sb_util_ts_1.stringIsEmpty(cmd))
+                return;
+            let message;
+            if (typeof error === 'string') {
+                message = error;
+            }
+            else {
+                message = error.message;
+            }
+            return this.runOnShell(cmd.replace('[error]', message));
+        });
     }
 }
 exports.Runner = Runner;

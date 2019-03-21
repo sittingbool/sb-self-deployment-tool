@@ -14,6 +14,8 @@ This tool will check the configured git repository for changes on remote for the
 - specify working directory
 - specify a build shell script
 - specify a deploy shell script
+- specify a success shell script
+- specify an error shell script
 - full typescript support
 
 ## Getting started
@@ -30,6 +32,7 @@ This tool will check the configured git repository for changes on remote for the
 - you can set a custom transport for mail: `runner.setupMailTransport(transport?: nodemailer.Transport); // see nodemailer docs for details`
 - start runner with config: `runner.runFromConfig('./config.json');`
 ## Config Parameters
+### Standard way
 ```
 {
   "workDir": ".", // optional, default: "." the directory where the tool should work in and where the git is
@@ -61,7 +64,47 @@ This tool will check the configured git repository for changes on remote for the
   "envVar": "NODE_ENV", // this will set the variable on process.env to check for the environment
   "buildCmd": "echo 'build would be here'", // this will be run at build time if set
   "deployCmd": "echo 'deployment would be here'" // this will be run at deployment time if set
+  "successCmd": "echo 'deployment succeeded command would be here'", // this will be run in case of a seccessful deployment if set
+  "errorCmd": "echo 'deployment errored command with [error]'", // this will be run if an error occured if set, place [error] to where the error message should go
 }
 ```
-#Licence
+### Using environment variables
+You can set your config parameters simply by environment variables for running containers. THis is done by setting the config parameter to a string that is indicated with `env:` followed by the environment variable to use: `"env:MY_VAR"`.
+See the following example:
+```
+{
+  "workDir": "env:WORK_DIR",
+  "git": {
+    "repository": "env:GIT_REPO",
+    "branch": "env:GIT_BRANCH"
+  },
+  "trigger": {
+    "cron": "env:CRON_SCHEDULE",
+    "webInterface": {
+      "port": "env:WEB_INTERFACE_PORT",
+      "endpoint": "env:WEB_ENDPOINT",
+      "excludeEnvironments": "env:EXCLUDE_ENVS"
+    }
+  },
+  "email": {
+    "sender": "env:EMAIL_SENDER",
+    "recipients": "env:EMAIL_RECIPIENTS",
+    "transport": {
+      "host": "env:EMAIL_HOST",
+      "port": "env:EMAIL_PORT",
+      "secure": "env:EMAIL_USE_SSL_TLS",
+      "auth": {
+        "user": "env:EMAIL_USER",
+        "pass": "env:EMAIL_PASSWORD"
+      }
+    }
+  },
+  "envVar": "NODE_ENV",
+  "buildCmd": "env:BUILD_CMD",
+  "deployCmd": "env:DEPLOY_CMD",
+  "successCmd": "env:SUCCESS_CMD",
+  "errorCmd": "env:ERROR_CMD"
+}
+```
+# Licence
 MIT

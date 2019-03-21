@@ -3,7 +3,7 @@ import * as childProcess from 'child_process';
 import cron, {ScheduledTask} from 'node-cron';
 import {EndPointHandler, HttpRouting, HttpServer} from "./server";
 import simplegit from 'simple-git/promise';
-import {loadJson} from "./util";
+import {boolConfigFromEnv, floatConfigFromEnv, intConfigFromEnv, loadJson, stringConfigFromEnv} from "./util";
 import {arrayIsEmpty, mapIsEmpty, stringIsEmpty} from "sb-util-ts";
 import {ExecException} from "child_process";
 import * as nodemailer from 'nodemailer';
@@ -19,6 +19,16 @@ const defaultTransport = {
     }
 };
 
+const ConfigParamTypes: {[key: string]: string} =
+    {
+        workDir: 'string', git: 'config', trigger: 'config', email: 'config', envVar: 'string',
+        buildCmd: 'string', deployCmd: 'string', successCmd: 'string', errorCmd: 'string',
+        repository: 'string', branch: 'string', sender: 'string', recipients: 'string-array',
+        transport: 'config', host: 'string', port: 'int', secure: 'boolean', auth: 'config',
+        user: 'string', pass: 'string', cron: 'string', webInterface: 'config', endpoint: 'config',
+        excludeEnvironments: 'string-array'
+    };
+
 export interface RunnerConfig {
     workDir?: string;
     git?: GitConfig;
@@ -27,6 +37,8 @@ export interface RunnerConfig {
     envVar?: string;
     buildCmd?: string;
     deployCmd?: string;
+    successCmd?: string;
+    errorCmd?: string;
 }
 
 export interface GitConfig {
@@ -53,13 +65,13 @@ export interface WebInterfaceConfig {
 
 export class Runner {
 
-    private static cronTask: ScheduledTask;
-    private static httpServer: HttpServer;
-    private config: RunnerConfig = {};
-    private environment: string = 'unspecified';
-    private workDirPath: string = process.cwd();
-    private mailTransport: nodemailer.Transporter = nodemailer.createTransport(defaultTransport);
-    private usingMNonConfigMailTransport: boolean = false;
+    protected static cronTask: ScheduledTask;
+    protected static httpServer: HttpServer;
+    protected config: RunnerConfig = {};
+    protected environment: string = 'unspecified';
+    protected workDirPath: string = process.cwd();
+    protected mailTransport: nodemailer.Transporter = nodemailer.createTransport(defaultTransport);
+    protected usingMNonConfigMailTransport: boolean = false;
 
     setupMailTransport(transport?: nodemailer.Transport) {
         if (this.usingMNonConfigMailTransport && mapIsEmpty(transport)) {
@@ -90,6 +102,7 @@ export class Runner {
         } else {
             console.error('Invalid config given');
         }
+        this.replaceConfigByEnvVars();
         this.setupMailTransport();
         if (!stringIsEmpty(this.config.envVar)) {
             this.environment = process.env[<string>this.config.envVar] || this.environment;
@@ -128,11 +141,50 @@ export class Runner {
         }
     }
 
+    protected replaceConfigByEnvVars(input?: any): any {
+        let config: any = input || this.config;
+        for(const key in config) {
+            let entry: any = (<any>config)[key];
+            let type: string = ConfigParamTypes[key];
+            if (!entry) continue;
+            switch (type) {
+                case 'config':
+                    if (!Array.isArray(entry)) {
+                        config[key] = this.replaceConfigByEnvVars(entry);
+                    }
+                    break;
+                case 'string':
+                    config[key] = stringConfigFromEnv(entry);
+                    break;
+                case 'string-array':
+                    let value: string | string[] = stringConfigFromEnv(entry) || entry;
+                    if (typeof value === 'string') {
+                        value = value.split(',');
+                    }
+                    config[key] = value;
+                    break;
+                case 'int':
+                    config[key] = intConfigFromEnv(entry) || entry;
+                    break;
+                case 'float':
+                    config[key] = floatConfigFromEnv(entry) || entry;
+                    break;
+                case 'boolean':
+                    config[key] = boolConfigFromEnv(entry) || entry;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return input;
+    }
+
     private runCron(schedule: string) {
         Runner.cronTask = cron.schedule(schedule, () => {
             console.log(new Date() + ': Running from cron trigger');
             this.checkUpdates().catch(err => {
                 console.error(err);
+                this.runErrorCommand(this.config.errorCmd, err).catch(this.sendErrorMail);
                 this.sendErrorMail(err);
             });
         });
@@ -145,6 +197,7 @@ export class Runner {
                 HttpServer.sendResponse(response, 'Ok', 200);
             }).catch(err => {
                 console.error(err);
+                this.runErrorCommand(this.config.errorCmd, err).catch(this.sendErrorMail);
                 this.sendErrorMail(err);
                 HttpServer.sendResponse(response, 'Something went wrong:\n\n' + err, 200);
             });
@@ -204,11 +257,12 @@ export class Runner {
             console.log((new Date()) + ': Running deploy command ' + this.config.deployCmd);
             await this.runOnShell(<string>this.config.deployCmd);
         }
+        await this.runSuccessCommand(this.config.successCmd);
         this.sendSuccessMail();
         console.log((new Date()) + ': Done deploying for ' + branchName);
     }
 
-    private async runOnShell(cmd: string): Promise<string> {
+    protected async runOnShell(cmd: string): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             childProcess.exec(cmd, (error: ExecException | null, stdout: string, stderr: string) => {
                 if (error) {
@@ -230,8 +284,8 @@ export class Runner {
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
-            `Repository: ${repository}\n` + '\n' +
-            `Branch: ${branch}\n` + '\n' +
+            'Repository: ' + repository + '\n' +
+            'Branch: ' + branch + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
         let subject = 'Successful auto deployment on environment: ' + this.environment;
 
@@ -251,8 +305,8 @@ export class Runner {
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         msg = 'For\n' +
-            `Repository: ${repository}\n` + '\n' +
-            `Branch: ${branch}\n` + '\n' +
+            'Repository: ' + repository + '\n' +
+            'Branch: ' + branch + '\n' +
             '\n\nThe following error occurred:\n\n' +
             msg;
         let subject = 'Error on auto deployment on environment: ' + this.environment;
@@ -265,12 +319,29 @@ export class Runner {
             return console.error('No email config given to send result');
         }
         let emailConfig = <EmailConfig>this.config.email;
+        let recipients = typeof emailConfig.recipients === 'string' ? stringConfigFromEnv('' + emailConfig.recipients) : emailConfig.recipients.join(', ');
         const msg = Object.assign({
-            to: emailConfig.recipients.join(', '),
+            to: recipients,
             from: emailConfig.sender
         }, data);
         this.mailTransport.sendMail(msg)
             .then(() => { console.log('-- email sent --'); })
             .catch(console.error);
+    }
+
+    protected async runSuccessCommand(cmd: string | undefined) {
+        if (stringIsEmpty(cmd)) return;
+        return this.runOnShell(<string>cmd);
+    }
+
+    protected async runErrorCommand(cmd: string | undefined, error: Error | string) {
+        if (stringIsEmpty(cmd)) return;
+        let message;
+        if (typeof error === 'string') {
+            message = <string>error;
+        } else {
+            message = (<Error>error).message;
+        }
+        return this.runOnShell((<string>cmd).replace('[error]', message));
     }
 }

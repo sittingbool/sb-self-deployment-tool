@@ -27,5 +27,7 @@
   },
   "envVar": "NODE_ENV",
   "buildCmd": "echo 'build would be here'",
-  "deployCmd": "echo 'deployment would be here'"
+  "deployCmd": "echo 'deployment would be here'",
+  "successCmd": "echo 'deployment succeeded command would be here'",
+  "errorCmd": "echo 'deployment errored command with [error]'"
 }
