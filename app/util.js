@@ -58,6 +58,12 @@ function boolConfigFromEnv(name) {
     const strVal = stringConfigFromEnv(name);
     if (sb_util_ts_1.stringIsEmpty(strVal))
         return undefined;
+    if ((strVal || '').toLowerCase() === 'true') {
+        return true;
+    }
+    else if ((strVal || '').toLowerCase() === 'false') {
+        return false;
+    }
     return !!parseInt(strVal);
 }
 exports.boolConfigFromEnv = boolConfigFromEnv;

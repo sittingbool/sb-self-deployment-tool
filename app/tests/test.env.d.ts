@@ -1,0 +1,20 @@
+export declare const ReplacementTestProperties: {
+    "WORK_DIR": string;
+    "GIT_REPO": string;
+    "GIT_BRANCH": string;
+    "CRON_SCHEDULE": string;
+    "WEB_INTERFACE_PORT": number;
+    "WEB_ENDPOINT": string;
+    "EXCLUDE_ENVS": string;
+    "EMAIL_SENDER": string;
+    "EMAIL_RECIPIENTS": string;
+    "EMAIL_HOST": string;
+    "EMAIL_PORT": number;
+    "EMAIL_USE_SSL_TLS": boolean;
+    "EMAIL_USER": string;
+    "EMAIL_PASSWORD": string;
+    "BUILD_CMD": string;
+    "DEPLOY_CMD": string;
+    "SUCCESS_CMD": string;
+    "ERROR_CMD": string;
+};

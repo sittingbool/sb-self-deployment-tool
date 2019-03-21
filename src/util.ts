@@ -39,5 +39,10 @@ export function floatConfigFromEnv(name: string): number | undefined {
 export function boolConfigFromEnv(name: string): boolean | undefined {
     const strVal = stringConfigFromEnv(name);
     if (stringIsEmpty(strVal)) return undefined;
+    if ((strVal || '').toLowerCase() === 'true') {
+        return true;
+    } else if ((strVal || '').toLowerCase() === 'false') {
+        return false;
+    }
     return !!parseInt(<string>strVal);
 }

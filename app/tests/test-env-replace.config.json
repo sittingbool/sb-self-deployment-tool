@@ -1,0 +1,33 @@
+{
+  "workDir": "env:WORK_DIR",
+  "git": {
+    "repository": "env:GIT_REPO",
+    "branch": "env:GIT_BRANCH"
+  },
+  "trigger": {
+    "cron": "env:CRON_SCHEDULE",
+    "webInterface": {
+      "port": "env:WEB_INTERFACE_PORT",
+      "endpoint": "env:WEB_ENDPOINT",
+      "excludeEnvironments": "env:EXCLUDE_ENVS"
+    }
+  },
+  "email": {
+    "sender": "env:EMAIL_SENDER",
+    "recipients": "env:EMAIL_RECIPIENTS",
+    "transport": {
+      "host": "env:EMAIL_HOST",
+      "port": "env:EMAIL_PORT",
+      "secure": "env:EMAIL_USE_SSL_TLS",
+      "auth": {
+        "user": "env:EMAIL_USER",
+        "pass": "env:EMAIL_PASSWORD"
+      }
+    }
+  },
+  "envVar": "NODE_ENV",
+  "buildCmd": "env:BUILD_CMD",
+  "deployCmd": "env:DEPLOY_CMD",
+  "successCmd": "env:SUCCESS_CMD",
+  "errorCmd": "env:ERROR_CMD"
+}
