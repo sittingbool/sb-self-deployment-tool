@@ -68,6 +68,10 @@ function absoluteOrRelativePath(baseDir: string, dirPath: string): string {
     return path.isAbsolute(dirPath) ? dirPath : path.join(baseDir, dirPath);
 }
 
+function undiscloseBasicAuth(value: string): string {
+    return value.replace(/[\w\d]+:[\w\d]+@/ig, '<undisclosed-credentials>@');
+}
+
 export class Runner {
 
     protected static cronTask: ScheduledTask;
@@ -124,6 +128,7 @@ export class Runner {
         git = simplegit(absolutePath);
         try {
             await this.initRunner();
+            this.sendStartedMail();
         } catch (e) {
             this.sendErrorMail(e);
         }
@@ -294,9 +299,9 @@ export class Runner {
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
             'Repository: ' + repository + '\n' +
-            'Branch: ' + branch.replace(/[\w\d]+:[\w\d]+@/ig, '<undisclosed-credentials>@') + '\n' +
+            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
-        let subject = 'Successful auto deployment on environment: ' + this.environment;
+        let subject = 'Started auto deployment on environment: ' + this.environment;
 
         this.sendMail({subject: subject, text: msg});
     }
@@ -307,7 +312,7 @@ export class Runner {
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
             'Repository: ' + repository + '\n' +
-            'Branch: ' + branch + '\n' +
+            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
         let subject = 'Successful auto deployment on environment: ' + this.environment;
 
@@ -328,7 +333,7 @@ export class Runner {
         const branch = gitConfig.branch || 'unknown';
         msg = 'For\n' +
             'Repository: ' + repository + '\n' +
-            'Branch: ' + branch + '\n' +
+            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
             '\n\nThe following error occurred:\n\n' +
             msg;
         let subject = 'Error on auto deployment on environment: ' + this.environment;

@@ -48,6 +48,9 @@ const ConfigParamTypes = {
 function absoluteOrRelativePath(baseDir, dirPath) {
     return path_1.default.isAbsolute(dirPath) ? dirPath : path_1.default.join(baseDir, dirPath);
 }
+function undiscloseBasicAuth(value) {
+    return value.replace(/[\w\d]+:[\w\d]+@/ig, '<undisclosed-credentials>@');
+}
 class Runner {
     constructor() {
         this.config = {};
@@ -104,6 +107,7 @@ class Runner {
             git = promise_1.default(absolutePath);
             try {
                 yield this.initRunner();
+                this.sendStartedMail();
             }
             catch (e) {
                 this.sendErrorMail(e);
@@ -275,9 +279,9 @@ class Runner {
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
             'Repository: ' + repository + '\n' +
-            'Branch: ' + branch.replace(/[\w\d]+:[\w\d]+@/ig, '<undisclosed-credentials>@') + '\n' +
+            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
-        let subject = 'Successful auto deployment on environment: ' + this.environment;
+        let subject = 'Started auto deployment on environment: ' + this.environment;
         this.sendMail({ subject: subject, text: msg });
     }
     sendSuccessMail() {
@@ -286,7 +290,7 @@ class Runner {
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
             'Repository: ' + repository + '\n' +
-            'Branch: ' + branch + '\n' +
+            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
         let subject = 'Successful auto deployment on environment: ' + this.environment;
         this.sendMail({ subject: subject, text: msg });
@@ -306,7 +310,7 @@ class Runner {
         const branch = gitConfig.branch || 'unknown';
         msg = 'For\n' +
             'Repository: ' + repository + '\n' +
-            'Branch: ' + branch + '\n' +
+            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
             '\n\nThe following error occurred:\n\n' +
             msg;
         let subject = 'Error on auto deployment on environment: ' + this.environment;
