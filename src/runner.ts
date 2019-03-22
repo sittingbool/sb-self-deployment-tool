@@ -298,8 +298,8 @@ export class Runner {
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
-            'Repository: ' + repository + '\n' +
-            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
+            'Repository: ' + undiscloseBasicAuth(repository) + '\n' +
+            'Branch: ' + branch + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
         let subject = 'Started auto deployment on environment: ' + this.environment;
 
@@ -311,8 +311,8 @@ export class Runner {
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
-            'Repository: ' + repository + '\n' +
-            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
+            'Repository: ' + undiscloseBasicAuth(repository) + '\n' +
+            'Branch: ' +  branch + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
         let subject = 'Successful auto deployment on environment: ' + this.environment;
 
@@ -332,8 +332,8 @@ export class Runner {
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         msg = 'For\n' +
-            'Repository: ' + repository + '\n' +
-            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
+            'Repository: ' + undiscloseBasicAuth(repository) + '\n' +
+            'Branch: ' + branch + '\n' +
             '\n\nThe following error occurred:\n\n' +
             msg;
         let subject = 'Error on auto deployment on environment: ' + this.environment;
