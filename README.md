@@ -107,10 +107,10 @@ See the following example:
 }
 ```
 This can be combined with the standard way of configuring
-### Running using node
-## Default node runner
+## Running using node
+### Default node runner
 Please run the bin/index.js from the tools directory then. `node bin/index.js` or `node bin/index.js -c path/to/config.json`
-## PM2
+### PM2
 Use the args for setting the config like so:
 (pm2.json)
 ```
