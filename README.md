@@ -106,5 +106,8 @@ See the following example:
   "errorCmd": "env:ERROR_CMD"
 }
 ```
+This can be combined with the standard way of configuring
+### Running using node
+Please run the bin/index.js from the app directory then. `node app/bin/index.js` or `node app/bin/index.js -c path/to/config.json`
 # Licence
 MIT
