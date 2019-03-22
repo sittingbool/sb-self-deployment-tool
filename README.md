@@ -108,6 +108,24 @@ See the following example:
 ```
 This can be combined with the standard way of configuring
 ### Running using node
-Please run the bin/index.js from the app directory then. `node app/bin/index.js` or `node app/bin/index.js -c path/to/config.json`
+## Default node runner
+Please run the bin/index.js from the tools directory then. `node bin/index.js` or `node bin/index.js -c path/to/config.json`
+## PM2
+Use the args for setting the config like so:
+(pm2.json)
+```
+{
+  "apps" : [
+    {
+      "name": "Deploy-tool",
+      "script": "/usr/local/lib/node_modules/sb-self-deployment-tool/bin/index.js",
+        "args": "-c /Users/richardhabermann/Developer/sittingbool/checkout/sb-self-deployment-tool/config.json",
+      "cwd": "/usr/local/bin/",
+      "instances": 1,
+      "autorestart": true
+    }
+  ]
+}
+```
 # Licence
 MIT
