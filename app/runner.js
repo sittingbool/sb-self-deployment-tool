@@ -261,6 +261,17 @@ class Runner {
             });
         });
     }
+    sendStartedMail() {
+        const gitConfig = this.config.git || { repository: 'unknown', branch: 'unknown' };
+        const repository = gitConfig.repository || 'unknown';
+        const branch = gitConfig.branch || 'unknown';
+        const msg = 'For\n' +
+            'Repository: ' + repository + '\n' +
+            'Branch: ' + branch.replace(/[\w\d]+:[\w\d]+@/ig, '<undisclosed-credentials>@') + '\n' +
+            '\n\nThe deployment succeeded at ' + new Date();
+        let subject = 'Successful auto deployment on environment: ' + this.environment;
+        this.sendMail({ subject: subject, text: msg });
+    }
     sendSuccessMail() {
         const gitConfig = this.config.git || { repository: 'unknown', branch: 'unknown' };
         const repository = gitConfig.repository || 'unknown';
