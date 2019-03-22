@@ -63,6 +63,11 @@ export interface WebInterfaceConfig {
     excludeEnvironments: string[];
 }
 
+// if dirPath is absolute then it will be returned otherwise it will be the relative path combined with baseDir
+function absoluteOrRelativePath(baseDir: string, dirPath: string): string {
+    return path.isAbsolute(dirPath) ? dirPath : path.join(baseDir, dirPath);
+}
+
 export class Runner {
 
     protected static cronTask: ScheduledTask;
@@ -89,14 +94,18 @@ export class Runner {
     }
 
     async runFromConfig(config: string | RunnerConfig) {
+        console.log((new Date()) + ': Running from cwd: ' + process.cwd());
         if (mapIsEmpty(config) && stringIsEmpty(<string>config)) {
             console.error('Invalid config given');
         }
         let configFileName: string = 'config.json';
         if (!stringIsEmpty(<string>config)) {
             configFileName = <string>config;
+            console.log((new Date()) + ': Running with given config path: ' + configFileName);
             this.workDirPath = configFileName.substring(0, configFileName.lastIndexOf("/"));
-            this.config = await loadJson(path.join(process.cwd(), configFileName));
+            let configPath = absoluteOrRelativePath(process.cwd(), configFileName);
+            console.log((new Date()) + ': Loading config from ' + configPath);
+            this.config = await loadJson(configPath);
         } else if (!mapIsEmpty(config)) {
             this.config = <RunnerConfig>config;
         } else {
@@ -110,8 +119,8 @@ export class Runner {
         if (!stringIsEmpty(this.config.workDir)) {
             this.workDirPath = path.join(this.workDirPath, <string>this.config.workDir);
         }
-        const absolutePath = path.isAbsolute(this.workDirPath) ? this.workDirPath : path.join(process.cwd(), this.workDirPath);
-        console.log((new Date()) + ': Started auto deploy runner for directory: ' + absolutePath);
+        const absolutePath = absoluteOrRelativePath(process.cwd(), this.workDirPath);
+        console.log((new Date()) + ': Started auto deploy runner for working directory: ' + absolutePath);
         git = simplegit(absolutePath);
         try {
             await this.initRunner();

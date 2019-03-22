@@ -44,6 +44,10 @@ const ConfigParamTypes = {
     user: 'string', pass: 'string', cron: 'string', webInterface: 'config', endpoint: 'config',
     excludeEnvironments: 'string-array'
 };
+// if dirPath is absolute then it will be returned otherwise it will be the relative path combined with baseDir
+function absoluteOrRelativePath(baseDir, dirPath) {
+    return path_1.default.isAbsolute(dirPath) ? dirPath : path_1.default.join(baseDir, dirPath);
+}
 class Runner {
     constructor() {
         this.config = {};
@@ -68,14 +72,18 @@ class Runner {
     }
     runFromConfig(config) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log((new Date()) + ': Running from cwd: ' + process.cwd());
             if (sb_util_ts_1.mapIsEmpty(config) && sb_util_ts_1.stringIsEmpty(config)) {
                 console.error('Invalid config given');
             }
             let configFileName = 'config.json';
             if (!sb_util_ts_1.stringIsEmpty(config)) {
                 configFileName = config;
+                console.log((new Date()) + ': Running with given config path: ' + configFileName);
                 this.workDirPath = configFileName.substring(0, configFileName.lastIndexOf("/"));
-                this.config = yield util_1.loadJson(path_1.default.join(process.cwd(), configFileName));
+                let configPath = absoluteOrRelativePath(process.cwd(), configFileName);
+                console.log((new Date()) + ': Loading config from ' + configPath);
+                this.config = yield util_1.loadJson(configPath);
             }
             else if (!sb_util_ts_1.mapIsEmpty(config)) {
                 this.config = config;
@@ -91,8 +99,8 @@ class Runner {
             if (!sb_util_ts_1.stringIsEmpty(this.config.workDir)) {
                 this.workDirPath = path_1.default.join(this.workDirPath, this.config.workDir);
             }
-            const absolutePath = path_1.default.isAbsolute(this.workDirPath) ? this.workDirPath : path_1.default.join(process.cwd(), this.workDirPath);
-            console.log((new Date()) + ': Started auto deploy runner for directory: ' + absolutePath);
+            const absolutePath = absoluteOrRelativePath(process.cwd(), this.workDirPath);
+            console.log((new Date()) + ': Started auto deploy runner for working directory: ' + absolutePath);
             git = promise_1.default(absolutePath);
             try {
                 yield this.initRunner();
