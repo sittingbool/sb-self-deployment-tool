@@ -69,7 +69,7 @@ function absoluteOrRelativePath(baseDir: string, dirPath: string): string {
 }
 
 function undiscloseBasicAuth(value: string): string {
-    return value.replace(/[\w\d]+:[\w\d]+@/ig, '<undisclosed-credentials>@');
+    return value.replace(/\w+:\w+@/ig, '<undisclosed-credentials>@');
 }
 
 export class Runner {

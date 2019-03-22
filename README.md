@@ -119,7 +119,9 @@ Use the args for setting the config like so:
     {
       "name": "Deploy-tool",
       "script": "/usr/local/lib/node_modules/sb-self-deployment-tool/bin/index.js",
-        "args": "-c /Users/richardhabermann/Developer/sittingbool/checkout/sb-self-deployment-tool/config.json",
+      
+      "args": "-c /var/www/cool-api/config.json", // here, not in script!
+      
       "cwd": "/usr/local/bin/",
       "instances": 1,
       "autorestart": true
