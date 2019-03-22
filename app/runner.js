@@ -49,7 +49,7 @@ function absoluteOrRelativePath(baseDir, dirPath) {
     return path_1.default.isAbsolute(dirPath) ? dirPath : path_1.default.join(baseDir, dirPath);
 }
 function undiscloseBasicAuth(value) {
-    return value.replace(/[\w\d]+:[\w\d]+@/ig, '<undisclosed-credentials>@');
+    return value.replace(/\w+:\w+@/ig, '<undisclosed-credentials>@');
 }
 class Runner {
     constructor() {
