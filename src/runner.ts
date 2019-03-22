@@ -343,7 +343,7 @@ export class Runner {
 
     private sendMail(data: {subject: string, text: string}) {
         if (mapIsEmpty(this.config.email)) {
-            return console.error('No email config given to send result');
+            return console.warn('No email config given to send result');
         }
         let emailConfig = <EmailConfig>this.config.email;
         let recipients = typeof emailConfig.recipients === 'string' ? stringConfigFromEnv('' + emailConfig.recipients) : emailConfig.recipients.join(', ');

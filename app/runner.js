@@ -318,7 +318,7 @@ class Runner {
     }
     sendMail(data) {
         if (sb_util_ts_1.mapIsEmpty(this.config.email)) {
-            return console.error('No email config given to send result');
+            return console.warn('No email config given to send result');
         }
         let emailConfig = this.config.email;
         let recipients = typeof emailConfig.recipients === 'string' ? util_1.stringConfigFromEnv('' + emailConfig.recipients) : emailConfig.recipients.join(', ');
