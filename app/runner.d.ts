@@ -49,6 +49,7 @@ export declare class Runner {
     checkUpdates(): Promise<void>;
     private performDeployment;
     protected runOnShell(cmd: string): Promise<string>;
+    private sendStartedMail;
     private sendSuccessMail;
     private sendErrorMail;
     private sendMail;

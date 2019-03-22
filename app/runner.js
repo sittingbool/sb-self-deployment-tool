@@ -48,6 +48,9 @@ const ConfigParamTypes = {
 function absoluteOrRelativePath(baseDir, dirPath) {
     return path_1.default.isAbsolute(dirPath) ? dirPath : path_1.default.join(baseDir, dirPath);
 }
+function undiscloseBasicAuth(value) {
+    return value.replace(/[\w\d]+:[\w\d]+@/ig, '<undisclosed-credentials>@');
+}
 class Runner {
     constructor() {
         this.config = {};
@@ -104,6 +107,7 @@ class Runner {
             git = promise_1.default(absolutePath);
             try {
                 yield this.initRunner();
+                this.sendStartedMail();
             }
             catch (e) {
                 this.sendErrorMail(e);
@@ -269,13 +273,24 @@ class Runner {
             });
         });
     }
+    sendStartedMail() {
+        const gitConfig = this.config.git || { repository: 'unknown', branch: 'unknown' };
+        const repository = gitConfig.repository || 'unknown';
+        const branch = gitConfig.branch || 'unknown';
+        const msg = 'For\n' +
+            'Repository: ' + repository + '\n' +
+            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
+            '\n\nThe deployment succeeded at ' + new Date();
+        let subject = 'Started auto deployment on environment: ' + this.environment;
+        this.sendMail({ subject: subject, text: msg });
+    }
     sendSuccessMail() {
         const gitConfig = this.config.git || { repository: 'unknown', branch: 'unknown' };
         const repository = gitConfig.repository || 'unknown';
         const branch = gitConfig.branch || 'unknown';
         const msg = 'For\n' +
             'Repository: ' + repository + '\n' +
-            'Branch: ' + branch + '\n' +
+            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
             '\n\nThe deployment succeeded at ' + new Date();
         let subject = 'Successful auto deployment on environment: ' + this.environment;
         this.sendMail({ subject: subject, text: msg });
@@ -295,7 +310,7 @@ class Runner {
         const branch = gitConfig.branch || 'unknown';
         msg = 'For\n' +
             'Repository: ' + repository + '\n' +
-            'Branch: ' + branch + '\n' +
+            'Branch: ' + undiscloseBasicAuth(branch) + '\n' +
             '\n\nThe following error occurred:\n\n' +
             msg;
         let subject = 'Error on auto deployment on environment: ' + this.environment;
@@ -303,7 +318,7 @@ class Runner {
     }
     sendMail(data) {
         if (sb_util_ts_1.mapIsEmpty(this.config.email)) {
-            return console.error('No email config given to send result');
+            return console.warn('No email config given to send result');
         }
         let emailConfig = this.config.email;
         let recipients = typeof emailConfig.recipients === 'string' ? util_1.stringConfigFromEnv('' + emailConfig.recipients) : emailConfig.recipients.join(', ');
