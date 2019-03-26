@@ -11,6 +11,7 @@ export declare const ReplacementTestProperties: {
     "EMAIL_HOST": string;
     "EMAIL_PORT": number;
     "EMAIL_USE_SSL_TLS": boolean;
+    "SMTP_REJECT_UNAUTHORIZED": boolean;
     "EMAIL_USER": string;
     "EMAIL_PASSWORD": string;
     "BUILD_CMD": string;

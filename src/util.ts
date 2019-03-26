@@ -46,3 +46,47 @@ export function boolConfigFromEnv(name: string): boolean | undefined {
     }
     return !!parseInt(<string>strVal);
 }
+
+function isNumeric(n: string) {
+    let val = parseFloat(n);
+    return !isNaN(val) && isFinite(val);
+}
+
+export function detectTypeInString(value: string | undefined): 'int' | 'float' | 'boolean' | 'null' | 'string' | string | undefined {
+    if (stringIsEmpty(value)) return value;
+
+    let val = (<string>value).trim().toLowerCase();
+
+    if (val === 'null') {
+        return 'null';
+    }
+
+    if (val.indexOf('true') > -1 || val.indexOf('false') > -1) {
+        return 'boolean';
+    }
+
+    if (isNumeric(val)) {
+        if (val.indexOf('.') > -1) {
+            return 'float';
+        }
+        return 'int';
+    }
+
+    return 'string';
+}
+
+export function typeParsedValueFromString(value: string | undefined): number | boolean | string | null | undefined {
+    let type = detectTypeInString(value);
+    switch (type) {
+        case 'null':
+            return null;
+        case 'boolean':
+            return (<string>value).trim().toLowerCase() === 'true';
+        case 'int':
+            return parseInt((<string>value).trim());
+        case 'float':
+            return parseFloat((<string>value).trim());
+        default:
+            return value;
+    }
+}
