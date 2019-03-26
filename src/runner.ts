@@ -20,16 +20,6 @@ const defaultTransport = {
     }
 };
 
-const ConfigParamTypes: {[key: string]: string} =
-    {
-        workDir: 'string', git: 'config', trigger: 'config', email: 'config', envVar: 'string',
-        buildCmd: 'string', deployCmd: 'string', successCmd: 'string', errorCmd: 'string',
-        repository: 'string', branch: 'string', sender: 'string', recipients: 'string-array',
-        transport: 'config', host: 'string', port: 'int', secure: 'boolean', auth: 'config',
-        user: 'string', pass: 'string', cron: 'string', webInterface: 'config', endpoint: 'config',
-        excludeEnvironments: 'string-array'
-    };
-
 export interface RunnerConfig {
     workDir?: string;
     git?: GitConfig;

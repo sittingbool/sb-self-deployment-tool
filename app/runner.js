@@ -37,14 +37,6 @@ const defaultTransport = {
         pass: 'account.pass' // generated ethereal password
     }
 };
-const ConfigParamTypes = {
-    workDir: 'string', git: 'config', trigger: 'config', email: 'config', envVar: 'string',
-    buildCmd: 'string', deployCmd: 'string', successCmd: 'string', errorCmd: 'string',
-    repository: 'string', branch: 'string', sender: 'string', recipients: 'string-array',
-    transport: 'config', host: 'string', port: 'int', secure: 'boolean', auth: 'config',
-    user: 'string', pass: 'string', cron: 'string', webInterface: 'config', endpoint: 'config',
-    excludeEnvironments: 'string-array'
-};
 // if dirPath is absolute then it will be returned otherwise it will be the relative path combined with baseDir
 function absoluteOrRelativePath(baseDir, dirPath) {
     return path_1.default.isAbsolute(dirPath) ? dirPath : path_1.default.join(baseDir, dirPath);
