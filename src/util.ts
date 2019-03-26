@@ -49,7 +49,7 @@ export function boolConfigFromEnv(name: string): boolean | undefined {
 
 function isNumeric(n: string) {
     let val = parseFloat(n);
-    return !isNaN(val) && isFinite(val);
+    return val +'' === n && !isNaN(val) && isFinite(val);
 }
 
 export function detectTypeInString(value: string | undefined): 'int' | 'float' | 'boolean' | 'null' | 'string' | string | undefined {

@@ -69,7 +69,7 @@ function boolConfigFromEnv(name) {
 exports.boolConfigFromEnv = boolConfigFromEnv;
 function isNumeric(n) {
     let val = parseFloat(n);
-    return !isNaN(val) && isFinite(val);
+    return val + '' === n && !isNaN(val) && isFinite(val);
 }
 function detectTypeInString(value) {
     if (sb_util_ts_1.stringIsEmpty(value))
