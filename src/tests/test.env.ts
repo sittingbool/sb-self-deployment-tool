@@ -15,6 +15,7 @@ export const ReplacementTestProperties = {
     "EMAIL_HOST": "smtp.superpower.com",
     "EMAIL_PORT": 432,
     "EMAIL_USE_SSL_TLS": true,
+    "SMTP_REJECT_UNAUTHORIZED": false,
     "EMAIL_USER": "smtp_user",
     "EMAIL_PASSWORD": "smtp_password",
 

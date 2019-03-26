@@ -26,6 +26,7 @@ const promise_1 = __importDefault(require("simple-git/promise"));
 const util_1 = require("./util");
 const sb_util_ts_1 = require("sb-util-ts");
 const nodemailer = __importStar(require("nodemailer"));
+const env_parser_1 = require("./env-parser");
 let git = promise_1.default(process.cwd());
 const defaultTransport = {
     host: "smtp.ethereal.email",
@@ -135,43 +136,8 @@ class Runner {
             this.runEndpoint(webInterface.endpoint, webInterface.port);
         }
     }
-    replaceConfigByEnvVars(input) {
-        let config = input || this.config;
-        for (const key in config) {
-            let entry = config[key];
-            let type = ConfigParamTypes[key];
-            if (!entry)
-                continue;
-            switch (type) {
-                case 'config':
-                    if (!Array.isArray(entry)) {
-                        config[key] = this.replaceConfigByEnvVars(entry);
-                    }
-                    break;
-                case 'string':
-                    config[key] = util_1.stringConfigFromEnv(entry);
-                    break;
-                case 'string-array':
-                    let value = util_1.stringConfigFromEnv(entry) || entry;
-                    if (typeof value === 'string') {
-                        value = value.split(',');
-                    }
-                    config[key] = value;
-                    break;
-                case 'int':
-                    config[key] = util_1.intConfigFromEnv(entry) || entry;
-                    break;
-                case 'float':
-                    config[key] = util_1.floatConfigFromEnv(entry) || entry;
-                    break;
-                case 'boolean':
-                    config[key] = util_1.boolConfigFromEnv(entry) || entry;
-                    break;
-                default:
-                    break;
-            }
-        }
-        return input;
+    replaceConfigByEnvVars() {
+        this.config = env_parser_1.EnvParser.replaceInObject(this.config);
     }
     runCron(schedule) {
         Runner.cronTask = node_cron_1.default.schedule(schedule, () => {
@@ -238,7 +204,15 @@ class Runner {
     }
     performDeployment(branchName) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (sb_util_ts_1.mapIsEmpty(this.config.git)) {
+                throw 'No git config given';
+            }
+            let gitConfig = this.config.git;
             console.log((new Date()) + ': Found changes on branch ' + branchName + ', performing deployment');
+            if (gitConfig.reset) {
+                console.log((new Date()) + ': Resetting on branch ' + branchName + ', performing deployment');
+                yield git.reset('hard');
+            }
             console.log((new Date()) + ': Pulling branch ' + branchName + ', performing deployment');
             yield git.pull();
             console.log((new Date()) + ': Successfully pulled branch ' + branchName);

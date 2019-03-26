@@ -1,6 +1,7 @@
 {
   "workDir": ".",
   "git": {
+    "reset": true,
     "repository": "git@github.com:sittingbool/sb-self-deployment-tool.git",
     "branch": "develop"
   },

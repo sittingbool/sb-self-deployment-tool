@@ -75,6 +75,9 @@ function detectTypeInString(value) {
     if (sb_util_ts_1.stringIsEmpty(value))
         return value;
     let val = value.trim().toLowerCase();
+    if (val === 'null') {
+        return 'null';
+    }
     if (val.indexOf('true') > -1 || val.indexOf('false') > -1) {
         return 'boolean';
     }
@@ -90,6 +93,8 @@ exports.detectTypeInString = detectTypeInString;
 function typeParsedValueFromString(value) {
     let type = detectTypeInString(value);
     switch (type) {
+        case 'null':
+            return null;
         case 'boolean':
             return value.trim().toLowerCase() === 'true';
         case 'int':

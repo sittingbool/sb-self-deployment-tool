@@ -13,6 +13,7 @@ export interface RunnerConfig {
     errorCmd?: string;
 }
 export interface GitConfig {
+    reset?: boolean;
     repository: string;
     branch: string;
 }
@@ -42,7 +43,7 @@ export declare class Runner {
     runFromConfig(config: string | RunnerConfig): Promise<void>;
     private initRunner;
     private initTriggers;
-    protected replaceConfigByEnvVars(input?: any): any;
+    protected replaceConfigByEnvVars(): void;
     private runCron;
     private runEndpoint;
     validateGit(): Promise<void>;

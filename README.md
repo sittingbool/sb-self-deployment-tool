@@ -37,6 +37,7 @@ This tool will check the configured git repository for changes on remote for the
 {
   "workDir": ".", // optional, default: "." the directory where the tool should work in and where the git is
   "git": {
+    "reset": true, // if set to true the tool will execute a git reset --hard before git oull
     "repository": "git@github.com:sittingbool/sb-self-deployment-tool.git", // make sure to use the output of git remote show origin
     "branch": "develop" // the branch to watch for changes
   },

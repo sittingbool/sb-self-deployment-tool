@@ -3,10 +3,11 @@ import * as childProcess from 'child_process';
 import cron, {ScheduledTask} from 'node-cron';
 import {EndPointHandler, HttpRouting, HttpServer} from "./server";
 import simplegit from 'simple-git/promise';
-import {boolConfigFromEnv, floatConfigFromEnv, intConfigFromEnv, loadJson, stringConfigFromEnv} from "./util";
+import {loadJson, stringConfigFromEnv} from "./util";
 import {arrayIsEmpty, mapIsEmpty, stringIsEmpty} from "sb-util-ts";
 import {ExecException} from "child_process";
 import * as nodemailer from 'nodemailer';
+import {EnvParser} from "./env-parser";
 
 let git = simplegit(process.cwd());
 const defaultTransport = {
@@ -42,6 +43,7 @@ export interface RunnerConfig {
 }
 
 export interface GitConfig {
+    reset?: boolean;
     repository: string;
     branch: string;
 }
@@ -155,42 +157,8 @@ export class Runner {
         }
     }
 
-    protected replaceConfigByEnvVars(input?: any): any {
-        let config: any = input || this.config;
-        for(const key in config) {
-            let entry: any = (<any>config)[key];
-            let type: string = ConfigParamTypes[key];
-            if (!entry) continue;
-            switch (type) {
-                case 'config':
-                    if (!Array.isArray(entry)) {
-                        config[key] = this.replaceConfigByEnvVars(entry);
-                    }
-                    break;
-                case 'string':
-                    config[key] = stringConfigFromEnv(entry);
-                    break;
-                case 'string-array':
-                    let value: string | string[] = stringConfigFromEnv(entry) || entry;
-                    if (typeof value === 'string') {
-                        value = value.split(',');
-                    }
-                    config[key] = value;
-                    break;
-                case 'int':
-                    config[key] = intConfigFromEnv(entry) || entry;
-                    break;
-                case 'float':
-                    config[key] = floatConfigFromEnv(entry) || entry;
-                    break;
-                case 'boolean':
-                    config[key] = boolConfigFromEnv(entry) || entry;
-                    break;
-                default:
-                    break;
-            }
-        }
-        return input;
+    protected replaceConfigByEnvVars() {
+        this.config = EnvParser.replaceInObject(this.config);
     }
 
     private runCron(schedule: string) {
@@ -259,7 +227,15 @@ export class Runner {
     }
 
     private async performDeployment(branchName: string) {
+        if (mapIsEmpty(this.config.git)) {
+            throw 'No git config given';
+        }
+        let gitConfig = <GitConfig>this.config.git;
         console.log((new Date()) + ': Found changes on branch ' + branchName + ', performing deployment');
+        if(gitConfig.reset) {
+            console.log((new Date()) + ': Resetting on branch ' + branchName + ', performing deployment');
+            await git.reset('hard');
+        }
         console.log((new Date()) + ': Pulling branch ' + branchName + ', performing deployment');
         await git.pull();
         console.log((new Date()) + ': Successfully pulled branch ' + branchName);
